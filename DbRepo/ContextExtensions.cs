@@ -8,6 +8,17 @@ namespace DbRepo
 {
 	public static class ContextExtensions
 	{
+		private static PropertyInfo? GetPropFromType<T>(object search) where T : class
+		{ 
+			foreach (PropertyInfo info in search.GetType().GetProperties())
+			{
+				if (info.PropertyType == typeof(T))
+				{
+					return info;
+				}
+			}
+			return null;
+		}
 		public static DbRepo.DbRepo<T> GetRepo<T>(this DbContext db) where T : class
 		{
 			string name = typeof(T).Name;
@@ -18,26 +29,21 @@ namespace DbRepo
 				//Attempt if pluralised exists
 				property = db.GetType().GetProperty(name + "s");
 				//Loop as a last resort, to avoid performance
-				foreach (PropertyInfo info in db.GetType().GetProperties())
-				{
-					if (info.PropertyType == typeof(DbSet<T>))
-					{
-						property = info;
-						break;
-					}
-				}
+				property = GetPropFromType<DbSet<T>>(db);
 				if (property == null)
 					throw new Exception($"A DbSet for {name} does not exist in the DbContext");
 			}
-
 			DbSet<T>? set = property.GetValue(db) as DbSet<T>;
 			if (set == null)
 			{
-				
-				throw new Exception($"{name} is not a valid DbSet");
+				property = GetPropFromType<DbSet<T>>(db);
+				if(property == null)
+					throw new Exception($"A DbSet for {name} does not exist in the DbContext");
+
+				set = property.GetValue(db) as DbSet<T>;
+				if (set == null)
+					throw new Exception($"{name} is not a valid DbSet");
 			}
-
-
 			return new DbRepo<T>(set, db);
 		}
 	}
