@@ -43,7 +43,7 @@ namespace DbRepo.Tests
 
 			context.Users.AddRange(new[] {
 				new User() { Id = 1, Email = "mail@ahowe.dev", Username = "00"},
-				new User() { Id = 2, Email = "mwmatthew10@gmail.com", Username = "TatoEXP"},
+				new User() { Id = 2, Email = "mwmatthew10@gmail.com", Username = "TatoExp"},
 			});
 
 			context.SaveChanges();
