@@ -1,9 +1,9 @@
 using System;
 using System.Reflection;
 
-namespace ReflectionRepoTest
+namespace DbRepo
 {
-	public static class ObjExtensions
+	internal static class ObjExtensions
 	{
 		public static T ToType<T>(this object obj)
 		{

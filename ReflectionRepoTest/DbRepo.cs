@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 using System.Linq.Expressions;
 using System.Collections.Generic;
 
-namespace ReflectionRepoTest
+namespace DbRepo
 {
 	public class DbRepo<T> where T : class
 	{
-		private readonly IQueryable<T> _set;
+		private readonly DbSet<T> _set;
 		private readonly DbContext _db;
 
 		/// <summary>
@@ -21,7 +21,7 @@ namespace ReflectionRepoTest
 		/// </summary>
 		/// <param name="set">The DbSet for the entity to make the repository for</param>
 		/// <param name="db">The DbContext</param>
-		public DbRepo(IQueryable<T> set, DbContext db) {
+		public DbRepo(DbSet<T> set, DbContext db) {
 			this._set = set;
 			this._db = db;
 		}
@@ -70,13 +70,63 @@ namespace ReflectionRepoTest
 				return null;
 			}
 		}
-		
+
+		#region Non-Asynchronous
+
 		/// <summary>
 		/// 
 		/// </summary>
 		/// <param name="obj"></param>
 		/// <returns></returns>
-		public async Task<T> FindOne(object obj) {
+		public T FindOne(object obj)
+		{
+			Expression<Func<T, bool>>? expression = BuildExpression(obj);
+			return _set.FirstOrDefault(expression);
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="obj"></param>
+		/// <returns></returns>
+		public T FindOneAndForget(object obj)
+		{
+			Expression<Func<T, bool>>? expression = BuildExpression(obj);
+			return _set.AsNoTracking().FirstOrDefault(expression);
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="obj"></param>
+		/// <returns></returns>
+		public T InsertOne(T obj)
+		{
+			_set.Add(obj);
+			int result = _db.SaveChanges();
+			return obj;
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="objArr"></param>
+		/// <returns></returns>
+		public IEnumerable<T> InsertMany(IEnumerable<T> objArr)
+		{
+			_set.AddRange(objArr);
+			int result = _db.SaveChanges();
+			return objArr;
+		}
+		#endregion
+
+		#region Asynchronous
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="obj"></param>
+		/// <returns></returns>
+		public async Task<T> FindOneAsync(object obj) {
 			Expression<Func<T, bool>>? expression = BuildExpression(obj);
 			return await _set.FirstOrDefaultAsync(expression).ConfigureAwait(false);
 		}
@@ -86,7 +136,7 @@ namespace ReflectionRepoTest
 		/// </summary>
 		/// <param name="obj"></param>
 		/// <returns></returns>
-		public async Task<T> FindOneAndForget(object obj) {
+		public async Task<T> FindOneAndForgetAsync(object obj) {
 			Expression<Func<T, bool>> expression = BuildExpression(obj);
 			return await _set.AsNoTracking().FirstOrDefaultAsync(expression).ConfigureAwait(false);
 		}
@@ -96,7 +146,7 @@ namespace ReflectionRepoTest
 		/// </summary>
 		/// <param name="obj"></param>
 		/// <returns></returns>
-		public async Task<T> InsertOne(T obj) {
+		public async Task<T> InsertOneAsync(T obj) {
 			//_set.Add(obj);
 			int result = await _db.SaveChangesAsync().ConfigureAwait(false);
 			return obj;
@@ -107,33 +157,12 @@ namespace ReflectionRepoTest
 		/// </summary>
 		/// <param name="objArr"></param>
 		/// <returns></returns>
-		public async Task<IEnumerable<T>> InsertMany(IEnumerable<T> objArr)
+		public async Task<IEnumerable<T>> InsertManyAsync(IEnumerable<T> objArr)
 		{
 			//_set.AddRange(objArr);
 			int result = await _db.SaveChangesAsync().ConfigureAwait(false);
 			return objArr;
 		}
-		
-		public T Testing(object val)
-		{
-			Type type = typeof(T);
-			PropertyInfo[] properties = val.GetType().GetProperties();
-
-			foreach (PropertyInfo prop in properties)
-			{
-				try
-				{
-					object? obj = prop.GetValue(val);
-					if (obj == null) continue;
-					Console.WriteLine($"{prop.Name}");
-				}
-				catch
-				{
-					// ignored
-				}
-			}
-			
-			return val.ToType<T>();
-		}
+		#endregion
 	}
 }
