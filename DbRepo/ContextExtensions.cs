@@ -17,22 +17,23 @@ namespace DbRepo
 			{
 				//Attempt if pluralised exists
 				property = db.GetType().GetProperty(name + "s");
+				//Loop as a last resort, to avoid performance
+				foreach (PropertyInfo info in db.GetType().GetProperties())
+				{
+					if (info.PropertyType == typeof(DbSet<T>))
+					{
+						property = info;
+						break;
+					}
+				}
 				if (property == null)
-					throw new Exception($"{name} is not a valid property of DbContext");	
+					throw new Exception($"A DbSet for {name} does not exist in the DbContext");
 			}
 
 			DbSet<T>? set = property.GetValue(db) as DbSet<T>;
 			if (set == null)
 			{
-				//Loop as a last resort, to avoid performance
-				foreach(PropertyInfo info in db.GetType().GetProperties())
-				{
-					if (info.PropertyType == typeof(DbSet<T>))
-					{
-						set = info.GetValue(db) as DbSet<T>;
-						return new DbRepo<T>(set, db);
-					}
-				}
+				
 				throw new Exception($"{name} is not a valid DbSet");
 			}
 
