@@ -26,45 +26,37 @@ namespace ReflectionRepoTest
 			this._db = db;
 		}
 
-		private Expression<Func<T, bool>> BuildExpression(object obj)
+		private Expression<Func<T, bool>>BuildExpression(object obj)
 		{
-			T epicObj = obj.ToType<T>();
-			// db.Users.Where(u => u.Id == id);
-			// db.UserRepo.FindOne(new {Id = id});
-
-			PropertyInfo[] properties = obj.GetType().GetProperties();
-
-			foreach (PropertyInfo prop in properties)
+			try
 			{
-				try
+				T convertedObj = obj.ToType<T>();
+				// db.Users.Where(u => u.Id == id);
+				// db.UserRepo.FindOne(new {Id = id});
+				ParameterExpression input = Expression.Parameter(convertedObj.GetType(), "Object");
+				BinaryExpression finalExpression = null;
+
+				PropertyInfo[] properties = obj.GetType().GetProperties();
+				foreach (PropertyInfo prop in properties)
 				{
 					object? obj2 = prop.GetValue(obj);
 					if (obj2 == null) continue;
-					ParameterExpression left = Expression.Parameter(prop.PropertyType, prop.Name);
-					Expression right = Expression.Constant(obj2);
-					Expression expr = Expression.Equal(left, right);
+					// Is db.Users.Where(u => u == new User {Id = 1}) possible on normal linq/efcore?
 
-					MethodCallExpression whereCallExpression = Expression.Call(
-						typeof(Queryable),
-						"Where",
-						new Type[] { _set.AsQueryable().ElementType },
-						_set.AsQueryable().Expression,
-						Expression.Lambda<Func<int, bool>>(expr, new ParameterExpression[] { left })
-					);
-
-					IQueryable<T> Queryable = _set.AsQueryable().Provider.CreateQuery<T>(whereCallExpression);
-					foreach(T entry in Queryable)
-					{
-						Console.WriteLine(entry);
-					}
-					return null;
+					MemberExpression property = Expression.Property(input, prop.Name);
+					Expression comparison = Expression.Constant(obj2);
+					BinaryExpression result = Expression.Equal(property, comparison);
+					if (finalExpression == null)
+						finalExpression = result;
+					else
+						finalExpression = Expression.And(finalExpression, result);
 				}
-				catch
-				{
-					return null; // ignored
-				}
+				return Expression.Lambda<Func<T, bool>>(finalExpression, input);
 			}
-			return null;
+			catch
+			{
+				return null;
+			}
 		}
 		
 		/// <summary>
@@ -73,8 +65,9 @@ namespace ReflectionRepoTest
 		/// <param name="obj"></param>
 		/// <returns></returns>
 		public async Task<T> FindOne(object obj) {
-			Expression<Func<T, bool>> expression = BuildExpression(obj);
-			return await _set.FirstOrDefaultAsync(expression).ConfigureAwait(false);
+			Expression<Func<T, bool>>? expression = BuildExpression(obj);
+			return null;
+			//return await _set.FirstOrDefaultAsync(expression).ConfigureAwait(false);
 		}
 
 		/// <summary>
