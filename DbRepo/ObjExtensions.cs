@@ -5,7 +5,7 @@ namespace DbRepo
 {
 	internal static class ObjExtensions
 	{
-		public static T ToType<T>(this object obj)
+		internal static T ToType<T>(this object obj)
 		{
 			T tmp = Activator.CreateInstance<T>();
 			foreach (PropertyInfo propertyInfo in obj.GetType().GetProperties())

@@ -56,11 +56,15 @@ namespace DbRepo
 					BinaryExpression result = Expression.Equal(property, comparison);
 
 					//If final expression is null set the value to the result
+
+					// Set result to final expression or append it to the existing expression
+					finalExpression = finalExpression == null ? Expression.And(finalExpression, result) : result;
 					if (finalExpression == null)
 						finalExpression = result;
 					else //if it is not null then "append" with an AND statement.
 						finalExpression = Expression.And(finalExpression, result);
 				}
+
 				//Return the created lambda function
 				return Expression.Lambda<Func<T, bool>>(finalExpression, input);
 			}
