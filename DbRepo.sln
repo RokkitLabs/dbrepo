@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30225.117
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DbRepo", "DbRepo\DbRepo.csproj", "{B0EEDA58-667C-487A-9AE9-E7978821ECEC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DbRepo.Tests", "DbRepo.Tests\DbRepo.Tests.csproj", "{373CDDA3-CE8E-4F80-9B8A-FBB10D693823}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B0EEDA58-667C-487A-9AE9-E7978821ECEC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B0EEDA58-667C-487A-9AE9-E7978821ECEC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B0EEDA58-667C-487A-9AE9-E7978821ECEC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B0EEDA58-667C-487A-9AE9-E7978821ECEC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{373CDDA3-CE8E-4F80-9B8A-FBB10D693823}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{373CDDA3-CE8E-4F80-9B8A-FBB10D693823}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{373CDDA3-CE8E-4F80-9B8A-FBB10D693823}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{373CDDA3-CE8E-4F80-9B8A-FBB10D693823}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {8CFCE1A9-7A98-4FD0-BE2A-416973149516}
+	EndGlobalSection
+EndGlobal
