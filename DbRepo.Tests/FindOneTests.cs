@@ -15,7 +15,8 @@ namespace DbRepo.Tests
 		public void Setup()
 		{
 			TestDB = TestContext.GetMockDB();
-			UserRepo = new DbRepo<User>(TestDB.Users, TestDB);
+			UserRepo = TestDB.GetRepo<User>();
+			//UserRepo = new DbRepo<User>(TestDB.Users, TestDB);
 		}
 
 		[Test]
