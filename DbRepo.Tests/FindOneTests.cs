@@ -22,8 +22,8 @@ namespace DbRepo.Tests
 		public async Task FindOneTest()
 		{
 			User firstLinqUser = await TestDB.Users.FirstOrDefaultAsync(u => u.Id == 1);
-			User firstDbRepoUser = UserRepo.FindOneAndForget(new { Id = 1 });
-
+			User firstDbRepoUser = await UserRepo.FindOneAsync(new { Id = 1 });
+		
 			Assert.AreEqual(firstLinqUser, firstDbRepoUser);
 		}
 	}
