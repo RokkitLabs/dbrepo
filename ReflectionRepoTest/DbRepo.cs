@@ -30,31 +30,43 @@ namespace ReflectionRepoTest
 		{
 			try
 			{
+				//Convert object to the Type we have received using extension method
 				T convertedObj = obj.ToType<T>();
-				// db.Users.Where(u => u.Id == id);
-				// db.UserRepo.FindOne(new {Id = id});
+				//This is the initial input, we will name the input Object so this will essentially be
+				//Object =>
 				ParameterExpression input = Expression.Parameter(convertedObj.GetType(), "Object");
+				//Init as null, this will allow us to check whether to add an AND or to instantiate further on in the loop
 				BinaryExpression finalExpression = null;
 
+				//Get a list of properties of the object, so that we can get key, value
 				PropertyInfo[] properties = obj.GetType().GetProperties();
-				foreach (PropertyInfo prop in properties)
+				foreach (PropertyInfo prop in properties) //Loop through
 				{
+					//Get the value from the object, we are not using the converted object as default values
+					//for fields create issues, so if there was an empty field it may end up being added as an AND
 					object? obj2 = prop.GetValue(obj);
+					//If null continue with loop
 					if (obj2 == null) continue;
-					// Is db.Users.Where(u => u == new User {Id = 1}) possible on normal linq/efcore?
-
+					
+					//Get property name from Object => Declared above, will essentially be Object.PropName
 					MemberExpression property = Expression.Property(input, prop.Name);
+					//Create a constant value using the property value
 					Expression comparison = Expression.Constant(obj2);
+					//Compare with the property of the object with the constant to ensure that they are equal
 					BinaryExpression result = Expression.Equal(property, comparison);
+
+					//If final expression is null set the value to the result
 					if (finalExpression == null)
 						finalExpression = result;
-					else
+					else //if it is not null then "append" with an AND statement.
 						finalExpression = Expression.And(finalExpression, result);
 				}
+				//Return the created lambda function
 				return Expression.Lambda<Func<T, bool>>(finalExpression, input);
 			}
 			catch
 			{
+				//We need to add an error here of some sort.
 				return null;
 			}
 		}
@@ -66,8 +78,7 @@ namespace ReflectionRepoTest
 		/// <returns></returns>
 		public async Task<T> FindOne(object obj) {
 			Expression<Func<T, bool>>? expression = BuildExpression(obj);
-			return null;
-			//return await _set.FirstOrDefaultAsync(expression).ConfigureAwait(false);
+			return await _set.FirstOrDefaultAsync(expression).ConfigureAwait(false);
 		}
 
 		/// <summary>
