@@ -12,6 +12,7 @@ namespace DbRepo.Tests
 
 		public TestContext(DbContextOptions opts) : base(opts)
 		{
+
 		}
 
 		protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -36,7 +37,7 @@ namespace DbRepo.Tests
 
 		public static TestContext GetMockDB()
 		{
-			DbContextOptions options = new DbContextOptionsBuilder<TestContext>().UseInMemoryDatabase(databaseName: "TestDatabase").Options;
+			DbContextOptions options = new DbContextOptionsBuilder<TestContext>().UseInMemoryDatabase(databaseName: $"{Guid.NewGuid()}-User").Options;
 			TestContext context = new TestContext(options);
 
 			context.Database.EnsureCreated();
@@ -50,5 +51,7 @@ namespace DbRepo.Tests
 
 			return context;
 		}
+
+		public static DbRepo<User> GetUserRepo() => GetMockDB().GetRepo<User>();
 	}
 }

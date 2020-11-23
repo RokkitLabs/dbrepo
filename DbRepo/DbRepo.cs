@@ -15,10 +15,12 @@ namespace DbRepo
 
 		/// <summary>
 		/// Creates a new database repository
-		/// ```cs
-		/// DbRepo<User> = new DbRepo<User>(Users, this);
-		/// ```
 		/// </summary>
+		/// <example>
+		/// <code>
+		/// DbRepo<User> = new DbRepo<User>(Users, this);
+		/// </code>
+		/// </example>
 		/// <param name="set">The DbSet for the entity to make the repository for</param>
 		/// <param name="db">The DbContext</param>
 		public DbRepo(DbSet<T> set, DbContext db) {
@@ -69,7 +71,7 @@ namespace DbRepo
 				//We need to add an error here of some sort.
 				return null;
 			}
-}
+		}
 
 		#region Non-Asynchronous
 
@@ -147,7 +149,7 @@ namespace DbRepo
 		/// <param name="obj"></param>
 		/// <returns></returns>
 		public async Task<T> InsertOneAsync(T obj) {
-			//_set.Add(obj);
+			await _set.AddAsync(obj).ConfigureAwait(false);
 			int result = await _db.SaveChangesAsync().ConfigureAwait(false);
 			return obj;
 		}
@@ -159,7 +161,7 @@ namespace DbRepo
 		/// <returns></returns>
 		public async Task<IEnumerable<T>> InsertManyAsync(IEnumerable<T> objArr)
 		{
-			//_set.AddRange(objArr);
+			await _set.AddRangeAsync(objArr).ConfigureAwait(false);
 			int result = await _db.SaveChangesAsync().ConfigureAwait(false);
 			return objArr;
 		}
