@@ -1,14 +1,14 @@
 ﻿using System;
-
+using System.Linq;
 namespace ReflectionRepoTest
 {
-	public class Program {
+	public class Program
+	{
 		public static void Main(string[] args)
 		{
-			DbRepo<User> userRepo = new DbRepo<User>();
-
-			User user = userRepo.Testing(new { Id = 15 });
-			Console.WriteLine($"{user.Id}");
+			User[] fatty = new User[]{ new User { Username = "Fuck off cunt" }, new User { Id = 69420 } };
+			DbRepo<User> userRepo = new DbRepo<User>(fatty.AsQueryable(), null);
+			userRepo.FindOne(new { Id = 69420 }).GetAwaiter().GetResult();
 		}
 	}
 }

@@ -3,7 +3,7 @@ using System.Reflection;
 
 namespace ReflectionRepoTest
 {
-	public static class ObjExxtensions
+	public static class ObjExtensions
 	{
 		public static T ToType<T>(this object obj)
 		{
