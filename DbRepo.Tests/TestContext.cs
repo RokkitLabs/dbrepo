@@ -12,7 +12,6 @@ namespace DbRepo.Tests
 
 		public TestContext(DbContextOptions opts) : base(opts)
 		{
-
 		}
 
 		protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -23,7 +22,8 @@ namespace DbRepo.Tests
 		{
 			modelBuilder.Entity<User>(entity => {
 				entity.Property(e => e.Id)
-					.IsRequired();
+					.IsRequired()
+					.ValueGeneratedNever();
 
 				entity.Property(e => e.Email)
 					.IsRequired()
@@ -40,6 +40,7 @@ namespace DbRepo.Tests
 			DbContextOptions options = new DbContextOptionsBuilder<TestContext>().UseInMemoryDatabase(databaseName: $"{Guid.NewGuid()}-User").Options;
 			TestContext context = new TestContext(options);
 
+			context.Database.EnsureDeleted();
 			context.Database.EnsureCreated();
 
 			context.Users.AddRange(new[] {

@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 using System.Linq.Expressions;
 using System.Collections.Generic;
+using DbRepo.Exceptions;
 
 namespace DbRepo
 {
@@ -28,6 +29,12 @@ namespace DbRepo
 			this._db = db;
 		}
 
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="obj"></param>
+		/// <returns></returns>
+		/// <exception cref="ExpressionBuilderException"></exception>
 		private Expression<Func<T, bool>>BuildExpression(object obj)
 		{
 			try
@@ -38,7 +45,7 @@ namespace DbRepo
 				//Object =>
 				ParameterExpression input = Expression.Parameter(convertedObj.GetType(), "Object");
 				//Init as null, this will allow us to check whether to add an AND or to instantiate further on in the loop
-				BinaryExpression finalExpression = null;
+				BinaryExpression? finalExpression = null;
 
 				//Get a list of properties of the object, so that we can get key, value
 				PropertyInfo[] properties = obj.GetType().GetProperties();
@@ -57,8 +64,6 @@ namespace DbRepo
 					//Compare with the property of the object with the constant to ensure that they are equal
 					BinaryExpression result = Expression.Equal(property, comparison);
 
-					//If final expression is null set the value to the result
-
 					// Set result to final expression or append it to the existing expression
 					finalExpression = finalExpression != null ? Expression.And(finalExpression, result) : result;
 				}
@@ -66,10 +71,9 @@ namespace DbRepo
 				//Return the created lambda function
 				return Expression.Lambda<Func<T, bool>>(finalExpression, input);
 			}
-			catch(Exception e)
+			catch(Exception ex)
 			{
-				//We need to add an error here of some sort.
-				return null;
+				throw new ExpressionBuilderException(ex);
 			}
 		}
 
