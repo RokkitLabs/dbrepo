@@ -7,8 +7,29 @@
 [Latest](https://github.com/unlimitedcoder2/dbrepo/releases)
 
 # 🕴️ Usage
+## Create repo
 ```cs
-Console.WriteLine("Hello, World!");
+using DbRepo;
+
+//Create a new context
+MyDbContext context = new MyDbContext();
+//Get repo from context
+DbRepo<User> userRepo = context.GetRepo<User>();
+```
+
+## Insert
+```cs
+User newUser = new User {
+    Id = 123,
+    Username = "Test User"
+};
+//Await the insertion of the newUser
+await userRepo.InsertOneAsync(newUser).ConfigureAwait(false);
+```
+
+## Find One
+```cs
+User firstDbRepoUser = await UserRepo.FindOneAsync(new { Id = 123 }).ConfigureAwait(false);
 ```
 
 # 🥅 Goals
