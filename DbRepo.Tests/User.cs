@@ -22,6 +22,8 @@ namespace DbRepo.Tests
 		[StringLength(20)]
 		public string Username { get; set; }
 
+		public static User Random(int id) => new User() { Id = id, Username = RandomUtils.GenerateName(12), Email = $"{new Random().Next(10000)}@example.com" };
+
 		public override bool Equals(object obj)
 		{
 			try
