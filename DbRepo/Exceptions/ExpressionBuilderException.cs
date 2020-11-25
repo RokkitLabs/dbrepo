@@ -9,9 +9,12 @@ namespace DbRepo.Exceptions
 		public ExpressionBuilderException()
 		{
 		}
-
+		public ExpressionBuilderException(string errorMessage) : base(errorMessage)
+		{
+		}
 		public ExpressionBuilderException(Exception ex) : base("", ex)
 		{
 		}
+
 	}
 }

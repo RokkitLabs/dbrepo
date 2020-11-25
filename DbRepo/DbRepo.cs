@@ -4,8 +4,10 @@ using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 using System.Linq.Expressions;
+using System.Diagnostics;
 using System.Collections.Generic;
 using DbRepo.Exceptions;
+using DbRepo.Attributes;
 
 namespace DbRepo
 {
@@ -13,7 +15,7 @@ namespace DbRepo
 	{
 		private readonly DbSet<T> _set;
 		private readonly DbContext _db;
-
+		private Dictionary<string, string> _propertyMap;
 		/// <summary>
 		/// Creates a new database repository
 		/// </summary>
@@ -25,8 +27,26 @@ namespace DbRepo
 		/// <param name="set">The DbSet for the entity to make the repository for</param>
 		/// <param name="db">The DbContext</param>
 		public DbRepo(DbSet<T> set, DbContext db) {
-			this._set = set;
-			this._db = db;
+			try
+			{
+				this._set = set;
+				this._db = db;
+				_propertyMap = new Dictionary<string, string>();
+				foreach (PropertyInfo property in typeof(T).GetProperties())
+				{
+					//Check if attribute of type RepoColumnName
+					RepoColumnName? attribute = property.GetCustomAttribute<RepoColumnName>(true);
+					if (attribute == null)
+						continue; //Continue to next property if not
+					string propName = property.Name;
+					string actualName = attribute.Name;
+					_propertyMap.Add(actualName, propName); //Map the custom column name to actual property name
+					_propertyMap.Add(propName, propName); //Map the normal property name to normal property name for validation
+				}
+			}
+			catch
+			{
+			}
 		}
 
 		/// <summary>
@@ -35,7 +55,7 @@ namespace DbRepo
 		/// <param name="obj"></param>
 		/// <returns></returns>
 		/// <exception cref="ExpressionBuilderException"></exception>
-		private Expression<Func<T, bool>>BuildExpression(object obj)
+		private Expression<Func<T, bool>>BuildExpression(object obj, bool skipValidation = false)
 		{
 			try
 			{
@@ -56,9 +76,17 @@ namespace DbRepo
 					object? obj2 = prop.GetValue(obj);
 					//If null continue with loop
 					if (obj2 == null) continue;
-					
+
+					string actualName;
+					if (!_propertyMap.TryGetValue(prop.Name, out actualName))
+					{
+						if (skipValidation)
+							continue;
+						throw new ExpressionBuilderException($"{prop.Name} is not a valid property of {nameof(T)}");
+					}
+						
 					//Get property name from Object => Declared above, will essentially be Object.PropName
-					MemberExpression property = Expression.Property(input, prop.Name);
+					MemberExpression property = Expression.Property(input, actualName);
 					//Create a constant value using the property value
 					Expression comparison = Expression.Constant(obj2);
 					//Compare with the property of the object with the constant to ensure that they are equal
@@ -71,7 +99,7 @@ namespace DbRepo
 				//Return the created lambda function
 				return Expression.Lambda<Func<T, bool>>(finalExpression, input);
 			}
-			catch(Exception ex)
+			catch (Exception ex)
 			{
 				throw new ExpressionBuilderException(ex);
 			}
@@ -84,9 +112,9 @@ namespace DbRepo
 		/// </summary>
 		/// <param name="obj"></param>
 		/// <returns></returns>
-		public T FindOne(object obj)
+		public T FindOne(object obj, bool skipValidation = false)
 		{
-			Expression<Func<T, bool>>? expression = BuildExpression(obj);
+			Expression<Func<T, bool>>? expression = BuildExpression(obj, skipValidation);
 			return _set.FirstOrDefault(expression);
 		}
 
@@ -95,9 +123,9 @@ namespace DbRepo
 		/// </summary>
 		/// <param name="obj"></param>
 		/// <returns></returns>
-		public T FindOneAndForget(object obj)
+		public T FindOneAndForget(object obj, bool skipValidation = false)
 		{
-			Expression<Func<T, bool>>? expression = BuildExpression(obj);
+			Expression<Func<T, bool>>? expression = BuildExpression(obj, skipValidation);
 			return _set.AsNoTracking().FirstOrDefault(expression);
 		}
 
@@ -132,8 +160,8 @@ namespace DbRepo
 		/// </summary>
 		/// <param name="obj"></param>
 		/// <returns></returns>
-		public async Task<T> FindOneAsync(object obj) {
-			Expression<Func<T, bool>>? expression = BuildExpression(obj);
+		public async Task<T> FindOneAsync(object obj, bool skipValidation = false) {
+			Expression<Func<T, bool>>? expression = BuildExpression(obj, skipValidation);
 			return await _set.FirstOrDefaultAsync(expression).ConfigureAwait(false);
 		}
 
@@ -142,8 +170,8 @@ namespace DbRepo
 		/// </summary>
 		/// <param name="obj"></param>
 		/// <returns></returns>
-		public async Task<T> FindOneAndForgetAsync(object obj) {
-			Expression<Func<T, bool>> expression = BuildExpression(obj);
+		public async Task<T> FindOneAndForgetAsync(object obj, bool skipValidation = false) {
+			Expression<Func<T, bool>> expression = BuildExpression(obj, skipValidation);
 			return await _set.AsNoTracking().FirstOrDefaultAsync(expression).ConfigureAwait(false);
 		}
 

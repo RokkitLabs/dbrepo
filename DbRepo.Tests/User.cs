@@ -5,12 +5,13 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 using System.Threading.Tasks;
-
+using DbRepo.Attributes;
 namespace DbRepo.Tests
 {
 	[Table("users")]
 	public class User
 	{
+		[RepoColumnName("id")]
 		[Column("id")]
 		public int Id { get; set; }
 
