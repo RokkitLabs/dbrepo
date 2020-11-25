@@ -1,5 +1,5 @@
 # 🗄️ DbRepo
-
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/EpicTestingTempOrganizationForStuff/dbrepo/.NET%20Core?style=for-the-badge)
 # 👷 Installation
 ## Get it from Nuget
 [Latest](https://nuget.org)
