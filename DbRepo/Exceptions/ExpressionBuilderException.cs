@@ -15,6 +15,5 @@ namespace DbRepo.Exceptions
 		public ExpressionBuilderException(Exception ex) : base("", ex)
 		{
 		}
-
 	}
 }

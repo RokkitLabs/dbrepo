@@ -26,6 +26,7 @@ namespace DbRepo
 		/// </example>
 		/// <param name="set">The DbSet for the entity to make the repository for</param>
 		/// <param name="db">The DbContext</param>
+		/// <exception cref="RepoInstantiationException"></exception>
 		public DbRepo(DbSet<T> set, DbContext db) {
 			try
 			{
@@ -44,8 +45,9 @@ namespace DbRepo
 					_propertyMap.Add(propName, propName); //Map the normal property name to normal property name for validation
 				}
 			}
-			catch
+			catch(Exception ex)
 			{
+				throw new RepoInstantiationException(ex);
 			}
 		}
 
